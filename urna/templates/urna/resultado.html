@@ -1,0 +1,207 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Resultado da Votação</title>
+
+    <link rel="stylesheet" href="{% static 'urna/resultado.css' %}">
+
+</head>
+
+<body>
+
+    <header class="cabecalho">
+
+        <div class="logo-urna">
+            🗳️
+        </div>
+
+        <div>
+            <h1>Urna Eletrônica</h1>
+            <p>Resultado da votação</p>
+        </div>
+
+    </header>
+
+
+    <main class="pagina">
+
+        <section class="resultado-container">
+
+
+            <!-- TÍTULO -->
+
+            <div class="titulo">
+
+                <span class="barra"></span>
+
+                <div>
+
+                    <h2>RESULTADO DA VOTAÇÃO</h2>
+
+                    <p>
+                        Total de votos registrados:
+                        <strong>{{ total_votos }}</strong>
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% if total_votos > 0 %}
+
+
+                <!-- CARDS DOS CANDIDATOS -->
+
+                <div class="lista-resultados">
+
+
+                    {% for candidato in candidatos %}
+
+                        <div class="card-candidato">
+
+
+                            <div class="posicao">
+
+                                {{ forloop.counter }}º
+
+                            </div>
+
+
+                            <div class="dados">
+
+                                <h3>
+                                    {{ candidato.nome }}
+                                </h3>
+
+                                <p class="partido">
+                                    {{ candidato.partido }}
+                                </p>
+
+                                <span class="numero">
+                                    Nº {{ candidato.numero }}
+                                </span>
+
+                            </div>
+
+
+                            <div class="votacao">
+
+                                <strong>
+                                    {{ candidato.votos }}
+                                </strong>
+
+                                <span>
+                                    votos
+                                </span>
+
+                            </div>
+
+
+                            <div class="percentual">
+
+                                {% widthratio candidato.votos total_votos 100 %}%
+
+                            </div>
+
+
+                        </div>
+
+                    {% endfor %}
+
+
+                    <!-- VOTO EM BRANCO -->
+
+                    <div class="card-candidato branco">
+
+
+                        <div class="posicao">
+                            —
+                        </div>
+
+
+                        <div class="dados">
+
+                            <h3>
+                                VOTOS EM BRANCO
+                            </h3>
+
+                            <p class="partido">
+                                Nenhum candidato selecionado
+                            </p>
+
+                        </div>
+
+
+                        <div class="votacao">
+
+                            <strong>
+                                {{ votos_brancos }}
+                            </strong>
+
+                            <span>
+                                votos
+                            </span>
+
+                        </div>
+
+
+                        <div class="percentual">
+
+                            {% widthratio votos_brancos total_votos 100 %}%
+
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+
+
+            {% else %}
+
+
+                <div class="sem-votos">
+
+                    <div class="icone">
+                        🗳️
+                    </div>
+
+                    <h3>
+                        Nenhum voto registrado
+                    </h3>
+
+                    <p>
+                        Ainda não foram registrados votos.
+                    </p>
+
+                </div>
+
+
+            {% endif %}
+
+
+            <div class="rodape">
+
+                <a href="/" class="botao-voltar">
+                    ← VOLTAR PARA A URNA
+                </a>
+
+            </div>
+
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

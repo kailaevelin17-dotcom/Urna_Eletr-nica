@@ -1,0 +1,337 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Urna Eletrônica</title>
+
+    <link rel="stylesheet" href="{% static 'urna/style.css' %}">
+
+</head>
+
+<body>
+
+    <div class="urna-fisica">
+
+        <div class="cabecalho-urna">
+
+            <div class="simbolo">⚖</div>
+
+            <div>
+                <strong>JUSTIÇA</strong>
+                <strong>ELEITORAL</strong>
+            </div>
+
+        </div>
+
+
+        <div class="area-tela">
+
+            <div class="tela">
+
+                <div class="tela-titulo">
+                    ELEIÇÃO
+                </div>
+
+
+                <div class="campo-numero">
+
+                    <span>NÚMERO:</span>
+
+                    <input
+                        type="text"
+                        id="numero"
+                        maxlength="2"
+                        readonly
+                    >
+
+                </div>
+
+
+                <div id="dados-candidato" class="dados-candidato">
+
+                    <div class="foto-candidato">
+
+                        <span>FOTO</span>
+
+                    </div>
+
+
+                    <div class="informacoes-candidato">
+
+                        <p>
+                            <strong>NOME:</strong>
+                            <span id="nome-candidato">—</span>
+                        </p>
+
+                        <p>
+                            <strong>PARTIDO:</strong>
+                            <span id="partido-candidato">—</span>
+                        </p>
+
+                        <p>
+                            <strong>CARGO:</strong>
+                            <span id="cargo-candidato">—</span>
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div id="mensagem" class="orientacao">
+                    DIGITE O NÚMERO DO CANDIDATO
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <form method="POST" id="form-urna">
+
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="numero"
+                id="numero-form"
+            >
+
+
+            <div class="painel-teclado">
+
+                <div class="teclado">
+
+                    <button type="button" onclick="digitar('1')">1</button>
+                    <button type="button" onclick="digitar('2')">2</button>
+                    <button type="button" onclick="digitar('3')">3</button>
+
+                    <button type="button" onclick="digitar('4')">4</button>
+                    <button type="button" onclick="digitar('5')">5</button>
+                    <button type="button" onclick="digitar('6')">6</button>
+
+                    <button type="button" onclick="digitar('7')">7</button>
+                    <button type="button" onclick="digitar('8')">8</button>
+                    <button type="button" onclick="digitar('9')">9</button>
+
+                    <button type="button" onclick="digitar('0')">0</button>
+
+                </div>
+
+
+                <div class="botoes-urna">
+
+                    <button
+                        type="button"
+                        class="botao-corrige"
+                        onclick="corrigir()"
+                    >
+                        CORRIGE
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        name="branco"
+                        value="1"
+                        class="botao-branco"
+                    >
+                        BRANCO
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="botao-confirma"
+                        onclick="return confirmarVoto()"
+                    >
+                        CONFIRMA
+                    </button>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+
+    <script>
+
+        const candidatos = [
+
+            {% for candidato in candidatos %}
+
+            {
+                numero: "{{ candidato.numero }}",
+                nome: "{{ candidato.nome|escapejs }}",
+                partido: "{{ candidato.partido|escapejs }}",
+                cargo: "{{ candidato.cargo|escapejs }}",
+                foto: "{% if candidato.foto %}{{ candidato.foto.url }}{% endif %}"
+            }
+
+            {% if not forloop.last %},{% endif %}
+
+            {% endfor %}
+
+        ];
+
+
+        function digitar(numero) {
+
+            const campo = document.getElementById("numero");
+
+            if (campo.value.length < 2) {
+
+                campo.value += numero;
+
+                mostrarCandidato();
+
+            }
+
+        }
+
+
+        function mostrarCandidato() {
+
+            const numero =
+                document.getElementById("numero").value;
+
+
+            const candidato = candidatos.find(
+                candidato => candidato.numero === numero
+            );
+
+
+            const nome =
+                document.getElementById("nome-candidato");
+
+            const partido =
+                document.getElementById("partido-candidato");
+
+            const cargo =
+                document.getElementById("cargo-candidato");
+
+            const mensagem =
+                document.getElementById("mensagem");
+
+            const foto =
+                document.querySelector(".foto-candidato");
+
+
+            if (candidato) {
+
+                nome.textContent = candidato.nome;
+
+                partido.textContent = candidato.partido;
+
+                cargo.textContent = candidato.cargo;
+
+                mensagem.textContent =
+                    "CONFIRA OS DADOS DO CANDIDATO E CONFIRME";
+
+
+                if (candidato.foto) {
+
+                    foto.innerHTML =
+                        `<img src="${candidato.foto}" alt="Foto de ${candidato.nome}">`;
+
+                } else {
+
+                    foto.innerHTML =
+                        "<span>FOTO</span>";
+
+                }
+
+            } else {
+
+                nome.textContent = "—";
+
+                partido.textContent = "—";
+
+                cargo.textContent = "—";
+
+                foto.innerHTML =
+                    "<span>FOTO</span>";
+
+
+                if (numero.length === 2) {
+
+                    mensagem.textContent =
+                        "NÚMERO NÃO ENCONTRADO";
+
+                } else {
+
+                    mensagem.textContent =
+                        "DIGITE O NÚMERO DO CANDIDATO";
+
+                }
+
+            }
+
+        }
+
+
+        function corrigir() {
+
+            document.getElementById("numero").value = "";
+
+            document.getElementById("numero-form").value = "";
+
+            document.getElementById("nome-candidato").textContent = "—";
+
+            document.getElementById("partido-candidato").textContent = "—";
+
+            document.getElementById("cargo-candidato").textContent = "—";
+
+            document.querySelector(".foto-candidato").innerHTML =
+                "<span>FOTO</span>";
+
+            document.getElementById("mensagem").textContent =
+                "DIGITE O NÚMERO DO CANDIDATO";
+
+        }
+
+
+        function confirmarVoto() {
+
+            const numero =
+                document.getElementById("numero").value;
+
+
+            const candidato = candidatos.find(
+                candidato => candidato.numero === numero
+            );
+
+
+            if (!candidato) {
+
+                document.getElementById("mensagem").textContent =
+                    "NÚMERO NÃO ENCONTRADO";
+
+                return false;
+
+            }
+
+
+            document.getElementById("numero-form").value =
+                numero;
+
+
+            return true;
+
+        }
+
+    </script>
+
+</body>
+
+</html>
